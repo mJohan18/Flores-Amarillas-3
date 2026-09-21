@@ -1,0 +1,1677 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Feliz Día de las Flores Amarillas</title>
+<meta name="description" content="Una carta con girasoles para el 21 de septiembre." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..600;1,9..144,200..600&family=Karla:wght@300;400&family=Italianno&display=swap" rel="stylesheet">
+
+<style>
+/* ======================================================================
+   PALETA Y TOKENS
+   Noche de jardín: todo oscuro para que el amarillo sea la única luz.
+   ====================================================================== */
+:root{
+  --noche:    #150d22;
+  --noche-2:  #2b1546;
+  --noche-3:  #40204f;
+  --sol:      #ffc93c;
+  --sol-luz:  #ffeaa7;
+  --sol-hondo:#d97a06;
+  --hoja:     #3f8f63;
+  --hoja-2:   #2b6b49;
+  --crema:    #fff4dd;
+  --semilla:  #3d2412;
+
+  --t-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --t-texto:   "Karla", ui-sans-serif, system-ui, sans-serif;
+  --t-firma:   "Italianno", "Fraunces", cursive, serif;
+
+  box-sizing: border-box;
+}
+/* El diseño es siempre nocturno: no se invierte con el tema del visor. */
+:root:not([data-theme="light"]), :root[data-theme="dark"]{ color-scheme: dark; }
+*, *::before, *::after{ box-sizing: inherit; }
+
+html, body{ height:100%; margin:0; }
+body{
+  background: var(--noche);
+  color: var(--crema);
+  font-family: var(--t-texto);
+  overflow:hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ======================================================================
+   CIELO
+   ====================================================================== */
+#cielo{
+  position:fixed; inset:0;
+  background:
+    radial-gradient(120% 80% at 50% 118%, rgba(255,201,60,.30) 0%, rgba(255,150,30,.10) 35%, transparent 62%),
+    radial-gradient(90% 65% at 18% 8%, rgba(88,40,130,.55) 0%, transparent 60%),
+    radial-gradient(80% 60% at 88% 12%, rgba(52,30,96,.60) 0%, transparent 58%),
+    linear-gradient(175deg, var(--noche) 0%, var(--noche-2) 52%, #1d0f2b 100%);
+  opacity:.45;
+  transition: opacity 2.6s ease;
+}
+body.abierto #cielo{ opacity:1; }
+
+/* Estrellas suaves (bokeh) */
+#luces{ position:fixed; inset:0; overflow:hidden; pointer-events:none; }
+.luz{
+  position:absolute; border-radius:50%;
+  background: radial-gradient(circle, rgba(255,235,170,.95) 0%, rgba(255,205,90,.45) 45%, transparent 70%);
+  filter: blur(.4px);
+  opacity:0;
+  animation: latir var(--d) ease-in-out var(--r) infinite alternate;
+}
+@keyframes latir{ from{ opacity:.08; transform: translateY(6px) scale(.85);} to{ opacity:.85; transform: translateY(-10px) scale(1.15);} }
+
+/* Viñeta para que el texto siempre se lea */
+#vineta{
+  position:fixed; inset:0; pointer-events:none;
+  background: radial-gradient(75% 55% at 50% 38%, transparent 0%, rgba(10,5,20,.55) 100%);
+}
+
+/* ======================================================================
+   PÉTALOS QUE CAEN
+   ====================================================================== */
+#lluvia{ position:fixed; inset:0; overflow:hidden; pointer-events:none; }
+.caida{
+  position:absolute; top:0; left:var(--x);
+  animation: caer var(--dur) linear var(--delay) infinite;
+  will-change: transform;
+}
+@keyframes caer{
+  from{ transform: translate3d(0,-18vh,0); }
+  to  { transform: translate3d(0,116vh,0); }
+}
+.petalo{
+  width: calc(11px * var(--s)); height: calc(21px * var(--s));
+  border-radius: 60% 60% 55% 55% / 78% 78% 30% 30%;
+  background: linear-gradient(170deg, var(--sol-luz) 0%, var(--sol) 45%, var(--sol-hondo) 100%);
+  box-shadow: 0 0 10px rgba(255,190,60,.35);
+  opacity: var(--o);
+  animation: revolotear var(--sw) ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes revolotear{
+  from{ transform: translateX(-24px) rotate(-25deg) rotateY(0deg); }
+  to  { transform: translateX(24px) rotate(var(--rot)) rotateY(180deg); }
+}
+
+/* ======================================================================
+   JARDÍN (los girasoles)
+   ====================================================================== */
+#jardin{
+  position:fixed; left:0; right:0; bottom:0;
+  height: min(56vh, 460px);
+  pointer-events:none;
+}
+.flor{
+  position:absolute; bottom:-4%;
+  width: var(--w);
+  transform-origin: 50% 100%;
+  animation: brisa var(--brisa) ease-in-out infinite alternate;
+  animation-delay: var(--bd);
+}
+@keyframes brisa{ from{ transform: rotate(-1.6deg);} to{ transform: rotate(1.6deg);} }
+.flor svg{ display:block; width:100%; height:auto; overflow:visible; }
+
+/* tallo: se dibuja solo */
+.tallo{ stroke-dasharray: var(--len); stroke-dashoffset: var(--len); }
+.creciendo .tallo{ animation: dibujar 1.5s cubic-bezier(.4,.05,.25,1) var(--dflor) forwards; }
+@keyframes dibujar{ to{ stroke-dashoffset:0; } }
+
+/* hojas */
+.hoja{ opacity:0; transform: scale(.2); transform-box: fill-box; transform-origin: 0% 50%; }
+.creciendo .hoja{ animation: abrirHoja .8s cubic-bezier(.2,.9,.3,1.2) forwards; animation-delay: calc(var(--dflor) + var(--dh)); }
+@keyframes abrirHoja{ to{ opacity:1; transform: scale(1);} }
+
+/* corazón de la flor */
+.centro, .semillas{ opacity:0; transform: scale(.1); transform-box: fill-box; transform-origin: 50% 50%; }
+.creciendo .centro{ animation: brotar .7s cubic-bezier(.2,.9,.3,1.25) forwards; animation-delay: calc(var(--dflor) + 1.35s); }
+.creciendo .semillas{ animation: brotar .9s ease-out forwards; animation-delay: calc(var(--dflor) + 1.7s); }
+@keyframes brotar{ to{ opacity:1; transform: scale(1);} }
+
+/* pétalos que florecen uno a uno */
+.pet{ opacity:0; transform: scale(.05) rotate(-14deg); transform-box: fill-box; transform-origin: 50% 100%; }
+.creciendo .pet{ animation: florecer .85s cubic-bezier(.16,.9,.28,1.3) forwards; animation-delay: calc(var(--dflor) + 1.5s + var(--i) * 48ms); }
+@keyframes florecer{ to{ opacity:1; transform: scale(1) rotate(0deg);} }
+
+.cabeza{ transform-box: fill-box; transform-origin: 50% 50%; animation: cabecear 7s ease-in-out infinite alternate; }
+@keyframes cabecear{ from{ transform: rotate(-2.2deg);} to{ transform: rotate(2.2deg);} }
+
+/* reverencia mágica: cuando aciertan la fecha, los girasoles inclinan la cabeza */
+.cabeza.reverencia{ animation: none !important; }
+
+/* brillo mágico: la flor respira luz */
+.aura{ transform-box: fill-box; transform-origin: 50% 50%; animation: respirarLuz 3.2s ease-in-out infinite; }
+@keyframes respirarLuz{
+  0%,100%{ opacity:.55; transform: scale(1); }
+  50%    { opacity:1;   transform: scale(1.07); }
+}
+.chispa{
+  opacity:0; transform-box: fill-box; transform-origin: 50% 50%;
+  animation: titilar var(--ct) ease-in-out var(--cr) infinite;
+}
+@keyframes titilar{ 0%,100%{ opacity:0; transform: scale(.3);} 50%{ opacity:1; transform: scale(1);} }
+.zarcillo{
+  stroke-dasharray: var(--zl); stroke-dashoffset: var(--zl);
+  opacity:0; transform-box: fill-box; transform-origin: 50% 100%;
+}
+.creciendo .zarcillo{
+  animation: dibujarZarcillo 1.4s ease-out forwards, ondear 4.5s ease-in-out 1.6s infinite alternate;
+  animation-delay: calc(var(--dflor) + 2.1s), calc(var(--dflor) + 3.5s);
+}
+@keyframes dibujarZarcillo{ to{ stroke-dashoffset:0; opacity:1; } }
+@keyframes ondear{ from{ transform: rotate(-4deg);} to{ transform: rotate(4deg);} }
+
+/* ======================================================================
+   ESCENARIO Y TEXTOS
+   ====================================================================== */
+#escena{
+  position:fixed; left:0; right:0; top:0; bottom: 30vh;
+  display:grid; place-items:center;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) 24px 0;
+  z-index:3;
+  overflow-y:auto;
+}
+.acto{
+  grid-area:1/1; width:min(660px, 92vw); text-align:center;
+  opacity:0; visibility:hidden; transition: opacity .8s ease;
+}
+.acto.activo{ opacity:1; visibility:visible; }
+
+/* revelado palabra por palabra */
+.rev span{
+  display:inline-block; margin-right:.26em;
+  opacity:0; transform: translateY(16px); filter: blur(7px);
+}
+.activo .rev span{
+  animation: entrar .95s cubic-bezier(.2,.75,.2,1) forwards;
+  animation-delay: calc(var(--base, 0ms) + var(--i) * 95ms);
+}
+@keyframes entrar{ to{ opacity:1; transform: translateY(0); filter: blur(0);} }
+
+.susurro{
+  font-family: var(--t-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.35rem, 5.2vw, 2.1rem);
+  line-height: 1.5;
+  letter-spacing: .01em;
+  color: #f6e6c8;
+  text-wrap: balance;
+}
+
+.titulo-envoltura{ filter: drop-shadow(0 0 26px rgba(255,186,50,.35)); }
+.titulo{
+  font-family: var(--t-display);
+  font-weight: 500;
+  font-size: clamp(2.5rem, 12.5vw, 5.4rem);
+  line-height: .96;
+  letter-spacing: -.028em;
+  margin:0;
+  background: linear-gradient(104deg, #ffcf55 0%, #fff6d4 22%, #f7a81f 46%, #fff6d4 70%, #ffcf55 100%);
+  background-size: 260% 100%;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  animation: brillo 7s linear infinite;
+}
+@keyframes brillo{ from{ background-position: 0% 50%;} to{ background-position: 260% 50%;} }
+.titulo .linea{ display:block; }
+.titulo .chica{ font-size:.42em; font-style:italic; font-weight:300; letter-spacing:-.01em; }
+
+.para{
+  margin-top: 1.1rem;
+  font-family: var(--t-texto); font-weight:300;
+  font-size: clamp(.98rem, 3.6vw, 1.15rem);
+  color: #e6d2b4;
+}
+.para b{ font-weight:400; color: var(--sol-luz); }
+
+.carta{
+  font-family: var(--t-texto);
+  font-weight: 300;
+  font-size: clamp(1.02rem, 4.1vw, 1.3rem);
+  line-height: 1.72;
+  color: #f7ecd9;
+  max-width: 34ch;
+  margin: 0 auto;
+  text-wrap: pretty;
+}
+.carta p{ margin: 0 0 .95em; }
+.carta p:last-child{ margin-bottom:0; }
+.activo .carta p{ opacity:0; animation: entrar 1.1s ease forwards; animation-delay: calc(var(--i) * 1100ms); }
+
+.firma{
+  font-family: var(--t-firma);
+  font-size: clamp(2.6rem, 10vw, 4rem);
+  line-height:1;
+  color: var(--sol-luz);
+  margin-top:.25em;
+}
+.firma-etiqueta{
+  font-family: var(--t-texto); font-weight:300;
+  font-size: clamp(.9rem, 3.4vw, 1.05rem);
+  color:#dcc5a4; letter-spacing:.04em;
+}
+
+/* ======================================================================
+   CONTROLES
+   ====================================================================== */
+button{ font: inherit; color: inherit; cursor: pointer; }
+:focus-visible{ outline: 2px solid var(--sol-luz); outline-offset: 4px; border-radius: 6px; }
+
+#sonido{
+  position:fixed; z-index:6;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: calc(env(safe-area-inset-right, 0px) + 14px);
+  width:44px; height:44px; border-radius:50%;
+  display:none; place-items:center;
+  background: rgba(255,240,205,.08);
+  border:1px solid rgba(255,225,160,.22);
+  backdrop-filter: blur(6px);
+  font-size:1.05rem; line-height:1;
+  transition: background .3s ease, opacity .3s ease;
+  opacity:.55;
+}
+body.abierto #sonido{ display:grid; }
+#sonido:hover{ opacity:1; background: rgba(255,240,205,.16); }
+
+.de-nuevo{
+  margin-top: 1.9rem;
+  background: transparent;
+  border: 1px solid rgba(255,216,140,.4);
+  color: #ffe6ae;
+  padding: .72em 1.5em;
+  border-radius: 999px;
+  font-size: .95rem; font-weight: 400; letter-spacing:.02em;
+  transition: background .35s ease, border-color .35s ease, transform .35s ease;
+}
+.de-nuevo:hover{ background: rgba(255,201,60,.14); border-color: rgba(255,216,140,.8); transform: translateY(-2px); }
+
+/* ======================================================================
+   CAJA FUERTE MÁGICA
+   ====================================================================== */
+.caja-fuerte{
+  margin-top:2.2rem;
+  display:grid;
+  gap:1rem;
+  justify-items:center;
+  transition: opacity .55s ease, transform .55s ease, filter .55s ease;
+}
+.caja-fuerte.se-esconde{
+  opacity:0;
+  transform: scale(.92);
+  filter: blur(6px);
+  pointer-events:none;
+}
+
+.caja-titulo{
+  font-family: var(--t-display);
+  font-style: italic;
+  font-size:.98rem;
+  color:#d8c19a;
+  letter-spacing:.02em;
+}
+
+.fecha-inputs{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+}
+.fecha-inputs span{
+  color:var(--sol-luz);
+  font-size:1.3rem;
+  opacity:.7;
+}
+
+/* cristal ámbar: cada casilla parece tallada en vidrio y respira su propia luz */
+.fecha-inputs input{
+  width:58px;
+  height:58px;
+  border-radius:16px;
+  border:1px solid rgba(255,201,60,.32);
+  background:
+    linear-gradient(155deg, rgba(255,224,150,.14) 0%, rgba(255,180,50,.05) 55%, rgba(120,70,10,.10) 100%);
+  color: var(--sol-luz);
+  text-align:center;
+  font-size:1.15rem;
+  font-family:var(--t-display);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 1px rgba(255,240,210,.35),
+    inset 0 -6px 14px rgba(120,60,10,.18),
+    0 0 0 rgba(255,190,60,0);
+  transition: box-shadow .3s ease, border-color .3s ease, transform .18s ease;
+  caret-color: var(--sol-luz);
+}
+#anioInput{ width:88px; }
+
+.fecha-inputs input::placeholder{ color: rgba(255,230,180,.35); }
+
+.fecha-inputs input:focus{
+  border-color: var(--sol);
+  box-shadow:
+    inset 0 1px 1px rgba(255,240,210,.4),
+    inset 0 -6px 14px rgba(120,60,10,.14),
+    0 0 22px rgba(255,201,60,.35);
+}
+
+/* pulso ámbar al teclear un dígito: como si el cristal encendiera una chispa por dentro */
+.fecha-inputs input.brilla{
+  animation: chispaVidrio .32s ease-out;
+}
+@keyframes chispaVidrio{
+  0%{ box-shadow: inset 0 1px 1px rgba(255,240,210,.4), inset 0 -6px 14px rgba(120,60,10,.14), 0 0 34px rgba(255,201,60,.75); transform: scale(1.06); }
+  100%{ box-shadow: inset 0 1px 1px rgba(255,240,210,.35), inset 0 -6px 14px rgba(120,60,10,.18), 0 0 8px rgba(255,190,60,.15); transform: scale(1); }
+}
+
+.fecha-inputs.tiembla{ animation: temblorSuave .45s ease; }
+@keyframes temblorSuave{
+  0%,100%{ transform: translateX(0); }
+  20%{ transform: translateX(-7px); }
+  40%{ transform: translateX(6px); }
+  60%{ transform: translateX(-4px); }
+  80%{ transform: translateX(3px); }
+}
+
+.error-fecha{
+  min-height:20px;
+  color:#ffb6a0;
+  font-size:.85rem;
+  margin:0;
+}
+
+/* candado dorado: aparece cuando la fecha es correcta y se abre solo */
+.candado-dorado{
+  width: 92px; height: 92px;
+  opacity:0;
+  transform: scale(.4);
+  transition: opacity .5s ease, transform .5s cubic-bezier(.2,.8,.25,1.3);
+  filter: drop-shadow(0 0 22px rgba(255,190,60,.55));
+}
+.candado-dorado.aparece{ opacity:1; transform: scale(1); }
+
+.grillete{
+  transform-box: fill-box;
+  transform-origin: 68% 100%;
+  transition: transform .85s cubic-bezier(.34,1.4,.4,1);
+}
+.candado-dorado.abierto .grillete{
+  transform: rotate(-42deg) translate(-4px,-2px);
+}
+.candado-dorado.abierto .cuerpo-candado{
+  animation: destelloOro .7s ease;
+}
+@keyframes destelloOro{
+  0%{ filter:brightness(1); } 45%{ filter:brightness(1.9); } 100%{ filter:brightness(1); }
+}
+
+/* ======================================================================
+   PANTALLA SECRETA
+   ====================================================================== */
+#pantallaSecreta{
+  position:fixed;
+  inset:0;
+  display:none;
+  place-items:start center;
+  overflow-y:auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 48px) 26px calc(env(safe-area-inset-bottom, 0px) + 56px);
+  background:
+    radial-gradient(60% 50% at 50% 42%, rgba(255,201,60,.14) 0%, transparent 70%),
+    radial-gradient(90% 70% at 50% 50%, #241438 0%, #12091d 70%, #0b0614 100%);
+  z-index:20;
+  opacity:0;
+  transition: opacity .7s ease;
+}
+#pantallaSecreta.activo{ display:grid; opacity:1; }
+
+.secreto-contenido{
+  width:min(620px,90vw);
+  text-align:center;
+  margin:auto;
+}
+.candado-abierto-icono{
+  font-size:2.6rem;
+  margin-bottom:.4rem;
+  filter: drop-shadow(0 0 18px rgba(255,201,60,.55));
+}
+.secreto-contenido h2{
+  font-family: var(--t-display);
+  font-weight:500;
+  font-style:italic;
+  font-size: clamp(1.7rem, 6vw, 2.6rem);
+  color: var(--sol-luz);
+  margin:.2em 0;
+}
+#mensajeOculto{
+  margin:1.6rem auto 1.8rem;
+  line-height:1.8;
+  font-size: clamp(1rem, 3.8vw, 1.18rem);
+  font-weight:300;
+  max-width:34ch;
+  color:#f7ecd9;
+  max-height: 46vh;
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,201,60,.45) transparent;
+}
+#mensajeOculto::-webkit-scrollbar{ width:6px; }
+#mensajeOculto::-webkit-scrollbar-thumb{ background: rgba(255,201,60,.45); border-radius:999px; }
+#mensajeOculto p{ margin:0 0 .8em; }
+#mensajeOculto p:last-child{ margin-bottom:0; }
+#mensajeOculto p.oculto-titulo{
+  font-family: var(--t-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.1rem, 4.4vw, 1.4rem);
+  color: var(--sol-luz);
+  margin-bottom: 1.1em;
+}
+
+/* ======================================================================
+   EL SOBRE (pantalla inicial)
+   ====================================================================== */
+#sobre{
+  position:fixed; inset:0; z-index:10;
+  display:grid; place-items:center; gap:0;
+  background: radial-gradient(90% 70% at 50% 45%, #241438 0%, #120a1d 70%, #0b0614 100%);
+  text-align:center;
+  padding: env(safe-area-inset-top, 0px) 26px env(safe-area-inset-bottom, 0px);
+  border:0;
+  width:100%;
+  transition: opacity 1.4s ease, transform 1.4s ease;
+}
+#sobre .interior{ display:grid; justify-items:center; gap:1.7rem; }
+#sobre.fuera{ opacity:0; transform: scale(1.12); pointer-events:none; }
+#sobre p{
+  margin:0;
+  font-family: var(--t-display); font-style:italic; font-weight:300;
+  font-size: clamp(1.15rem, 4.6vw, 1.55rem);
+  color:#efdcbb;
+}
+#sobre .pista{
+  font-family: var(--t-texto); font-size:.9rem; font-weight:300;
+  color:#b59fd0; letter-spacing:.06em;
+  animation: respirar 2.8s ease-in-out infinite;
+}
+@keyframes respirar{ 0%,100%{opacity:.45} 50%{opacity:1} }
+.capullo{ width: clamp(84px, 26vw, 118px); filter: drop-shadow(0 0 26px rgba(255,190,60,.45)); animation: pulso 3.4s ease-in-out infinite; }
+@keyframes pulso{ 0%,100%{ transform: scale(1) } 50%{ transform: scale(1.07) } }
+
+/* ======================================================================
+   ACCESIBILIDAD: movimiento reducido
+   ====================================================================== */
+@media (prefers-reduced-motion: reduce){
+  .caida, .petalo, .luz, .cabeza, .flor{ animation: none !important; }
+  #lluvia{ display:none; }
+  .rev span, .carta p{ animation-duration: .4s !important; }
+  .candado-dorado, .grillete{ transition-duration: .01s !important; }
+}
+
+/* Pantallas muy bajitas (móvil apaisado) */
+@media (max-height: 560px){
+  #escena{ bottom: 24vh; }
+  #jardin{ height: 48vh; }
+}
+
+/* ======================================================================
+   MEJORAS CINEMÁTICAS: última puerta, memoria local y partículas
+   ====================================================================== */
+#ultimaPuerta{
+  position:fixed; inset:0; z-index:40; display:grid; place-items:center;
+  padding:28px; text-align:center; pointer-events:none; opacity:0;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255,215,110,.22), transparent 34%),
+    radial-gradient(circle at 50% 55%, rgba(255,180,40,.10), transparent 62%),
+    #100817;
+  transition:opacity 1s ease;
+}
+#ultimaPuerta.activo{ opacity:1; pointer-events:auto; }
+#ultimaPuerta .puerta-contenido{
+  width:min(720px,92vw); transform:translateY(18px) scale(.98);
+  transition:transform 1.2s cubic-bezier(.2,.8,.2,1);
+}
+#ultimaPuerta.activo .puerta-contenido{ transform:none; }
+.puerta-linea{
+  margin:.65em 0; color:#f9e7c5; font-family:var(--t-display);
+  font-style:italic; font-weight:300; font-size:clamp(1.25rem,4.8vw,2.15rem);
+  opacity:0; transform:translateY(18px); filter:blur(8px);
+}
+#ultimaPuerta.activo .puerta-linea{ animation:puertaEntrada 1.1s ease forwards; }
+#ultimaPuerta.activo .puerta-linea:nth-child(2){animation-delay:.8s}
+#ultimaPuerta.activo .puerta-linea:nth-child(3){animation-delay:1.7s;color:var(--sol-luz)}
+@keyframes puertaEntrada{to{opacity:1;transform:none;filter:blur(0)}}
+#particulasDorado{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.particula-dorada{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  background:var(--sol-luz);box-shadow:0 0 14px 4px rgba(255,201,60,.65);
+  animation:partir 2.8s ease-out forwards;
+}
+@keyframes partir{
+  from{transform:translate(0,20px) scale(.2);opacity:0}
+  18%{opacity:1}
+  to{transform:translate(var(--tx),var(--ty)) scale(1);opacity:0}
+}
+#memoriaVisita{
+  min-height:1.2em;margin-top:.7rem;color:#bfa9d6;font-size:.8rem;
+  letter-spacing:.04em;opacity:.8
+}
+#mensajeOculto.tinta p{
+  opacity:0; clip-path:inset(0 100% 0 0);
+  animation:tintaEscribe 1.35s cubic-bezier(.2,.7,.2,1) forwards;
+  animation-delay:calc(var(--i) * 170ms);
+}
+#mensajeOculto.tinta p.oculto-titulo{
+  clip-path:none; animation:entrar 1s ease forwards;
+  animation-delay:0ms;
+}
+@keyframes tintaEscribe{
+  0%{opacity:0;clip-path:inset(0 100% 0 0);filter:blur(2px)}
+  30%{opacity:.55}
+  100%{opacity:1;clip-path:inset(0 0 0 0);filter:blur(0)}
+}
+#contadorSecreto{
+  margin-top:1.2rem;font-size:.75rem;color:#9e89b8;letter-spacing:.05em
+}
+#notificacionEstado{
+  min-height:1.1em;margin-top:.35rem;font-size:.72rem;color:#8d7a9e
+}
+@media (prefers-reduced-motion:reduce){
+  #ultimaPuerta .puerta-linea,#mensajeOculto.tinta p{animation:none!important;opacity:1!important;clip-path:none!important;filter:none!important;transform:none!important}
+  .particula-dorada{display:none}
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="cielo"></div>
+<div id="luces" aria-hidden="true"></div>
+<div id="jardin" aria-hidden="true"></div>
+<div id="lluvia" aria-hidden="true"></div>
+<div id="vineta" aria-hidden="true"></div>
+
+<main id="escena">
+
+  <section class="acto" id="acto1">
+    <p class="susurro rev" data-texto="Hoy el mundo entero se pone de acuerdo para pintarse de amarillo."></p>
+  </section>
+
+  <section class="acto" id="acto2">
+    <p class="susurro rev" data-texto="Y hay un ramo que venía buscándote desde hace rato."></p>
+  </section>
+
+  <section class="acto" id="acto3">
+    <div class="titulo-envoltura">
+      <h1 class="titulo">
+        <span class="linea chica">Feliz día de las</span>
+        <span class="linea">flores amarillas</span>
+      </h1>
+    </div>
+    <p class="para" id="linea-para"></p>
+  </section>
+
+  <section class="acto" id="acto4">
+    <div class="carta" id="carta"></div>
+  </section>
+
+  <section class="acto" id="acto5">
+    <p class="firma-etiqueta" id="etiqueta-firma"></p>
+    <p class="firma" id="firma"></p>
+    <button class="de-nuevo" id="deNuevo">Verlo otra vez</button>
+
+    <div class="caja-fuerte" id="cajaFuerte">
+      <p class="caja-titulo">Fecha Especial</p>
+
+      <div class="fecha-inputs" id="fechaInputs">
+        <input id="diaInput" inputmode="numeric" maxlength="2" placeholder="DD" aria-label="Día">
+        <span>/</span>
+        <input id="mesInput" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Mes">
+        <span>/</span>
+        <input id="anioInput" inputmode="numeric" maxlength="4" placeholder="AAAA" aria-label="Año">
+      </div>
+
+      <svg class="candado-dorado" id="candadoDorado" viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <linearGradient id="oroCandado" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff3c4"/>
+            <stop offset=".5" stop-color="#ffc93c"/>
+            <stop offset="1" stop-color="#c97a0a"/>
+          </linearGradient>
+        </defs>
+        <path class="grillete" d="M32,45 V30 a18,18 0 0 1 36,0 V45" fill="none" stroke="url(#oroCandado)" stroke-width="9" stroke-linecap="round"/>
+        <rect class="cuerpo-candado" x="20" y="42" width="60" height="46" rx="11" fill="url(#oroCandado)"/>
+        <circle cx="50" cy="63" r="6.5" fill="#5a3a06"/>
+        <rect x="47" y="63" width="6" height="14" rx="3" fill="#5a3a06"/>
+      </svg>
+
+      <p id="errorFecha" class="error-fecha" role="status"></p>
+    </div>
+  </section>
+
+</main>
+
+
+<!-- Última puerta: transición cinematográfica antes de la carta secreta -->
+<section id="ultimaPuerta" aria-hidden="true">
+  <div id="particulasDorado"></div>
+  <div class="puerta-contenido">
+    <p class="puerta-linea">Hay recuerdos que el tiempo nunca consiguió borrar.</p>
+    <p class="puerta-linea">Y hay una fecha que mi corazón nunca olvidó.</p>
+    <p class="puerta-linea">Bienvenida a la última puerta.</p>
+  </div>
+</section>
+
+<section id="pantallaSecreta">
+  <div class="secreto-contenido">
+    <div class="candado-abierto-icono" aria-hidden="true">🔓</div>
+    <h2>Lo encontraste.</h2>
+    <div id="mensajeOculto"></div>
+    <div id="contadorSecreto"></div>
+    <div id="notificacionEstado"></div>
+    <button id="volverCarta" class="de-nuevo">Volver</button>
+  </div>
+</section>
+
+<button id="sonido" aria-label="Silenciar la música">♪</button>
+
+<button id="sobre">
+  <span class="interior">
+    <svg class="capullo" viewBox="0 0 100 130" aria-hidden="true">
+      <path d="M50 128 C 47 95 47 70 50 52" stroke="#3f8f63" stroke-width="7" stroke-linecap="round" fill="none"/>
+      <path d="M50 96 C 30 92 22 78 24 66 C 38 66 49 78 50 96 Z" fill="#2b6b49"/>
+      <path d="M50 20 C 62 34 66 46 62 58 C 58 68 42 68 38 58 C 34 46 38 34 50 20 Z" fill="url(#g1)"/>
+      <path d="M50 26 C 57 38 59 48 56 56 C 53 63 47 63 44 56 C 41 48 43 38 50 26 Z" fill="#ffe9a8" opacity=".55"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffe9a8"/><stop offset=".55" stop-color="#ffc93c"/><stop offset="1" stop-color="#d97a06"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <p>Alguien te dejó algo aquí.</p>
+    <span class="pista">toca para abrirlo</span>
+  </span>
+</button>
+
+<script>
+/* ======================================================================
+   1) AQUÍ SE PERSONALIZA TODO  ✏️
+   Cambia solo lo que está entre comillas y listo.
+   ====================================================================== */
+const CONFIG = {
+
+  // Nombre de la persona (déjalo vacío "" si prefieres no poner nombre)
+  nombre: "Yasneri Arcia",
+
+  // Cómo firmas al final
+  firma: "Con mucho cariño",
+  etiquetaFirma: "Para ti",
+
+  // El mensaje: cada línea entre comillas es un párrafo.
+  mensaje: [
+    "Dicen que las flores amarillas se le regalan a quien, sin darse cuenta, le alegra los días a los demás.",
+    "Por eso hoy todas son para ti: por tu risa, por tu forma de hacer que todo pese menos, por lo mucho que te esfuerzas cada dia, por existir justo así.",
+    "Que la vida te devuelva multiplicado todo lo bonito que repartes.",
+    "Estas no se marchitan nunca."
+  ],
+
+  musica: true,   // pon false si prefieres que no suene nada
+
+  // Endpoint opcional para una notificación segura.
+  // NO pongas aquí un webhook de Discord. En GitHub Pages debe ser un endpoint
+  // intermedio/serverless que reciba el evento y envíe la notificación.
+  notificacion: {
+    endpoint: "",
+    enviar: true
+  },
+
+  // Fecha secreta (cámbiala por la tuya) — cada valor SIEMPRE en texto, con ceros si hace falta
+  fechaSecreta: {
+    dia:  "10",
+    mes:  "07",
+    anio: "2024"
+  },
+
+  // Mensaje oculto: se revela solo si aciertan la fecha secreta
+  mensajeOculto: [
+    "Donde siguen floreciendo las flores amarillas",
+    "Si algún día el tiempo pudiera guardar un latido, creo que elegiría guardar uno de los nuestros.",
+    "No sé por qué estoy escribiendo estas páginas. Bueno... sí lo sé. Las escribo porque hay sentimientos que no necesitan ser entregados para ser verdaderos. A veces basta con que existan.",
+    "Hoy miro hacia atrás y veo al chico que te prometía el cielo con los bolsillos vacíos, pero con el corazón lleno de sueños. Veo al mismo loco que imaginaba amaneceres, libros, viajes, cuadros, flores amarillas y mil planes contigo.",
+    "Y también veo algo que antes no alcanzaba a mirar.",
+    "Mientras corría para construir un futuro hermoso, olvidé detenerme a abrazar el presente. Creía que amarte era resolverlo todo, protegerte de todo, trabajar más, ahorrar más y preparar el momento perfecto. Hoy entiendo que muchas veces lo que más necesitabas era simplemente que me sentara a tu lado y te escuchara.",
+    "Y esa es una lección que llevaré conmigo siempre.",
+    "No escribo esto para borrar mis errores.",
+    "Los abrazo.",
+    "Porque fueron ellos quienes me enseñaron la clase de hombre que quiero seguir siendo.",
+    "Quiero ser alguien que escuche antes de responder.",
+    "Que abrace antes de intentar arreglar.",
+    "Que disfrute un helado, una caminata, una tarde cualquiera como si también fueran una forma de decir \"te quiero\".",
+    "¿Te acuerdas del 26 de junio?",
+    "Yo sí.",
+    "Hay recuerdos que el tiempo no consigue borrar. Aquel beso sigue viviendo en algún rincón tranquilo de mi corazón, no como una herida, sino como la prueba de que un día conocí una felicidad tan sencilla que bastó una mirada para que el mundo pareciera quedarse quieto.",
+    "Y pienso en algo que tú escribiste una vez.",
+    "\"Quiero que seas quien no deje que mi luz se apague.\"",
+    "Durante mucho tiempo creí que encender tu luz significaba hacer cosas enormes.",
+    "Hoy entiendo que una llama también se cuida con cosas pequeñas.",
+    "Con paciencia.",
+    "Con escucha.",
+    "Con presencia.",
+    "Y aunque ya no pueda cambiar lo que pasó, sí puedo cambiar quién soy de aquí en adelante.",
+    "Eso también lleva tu huella.",
+    "Quiero confesarte algo.",
+    "Las flores amarillas nunca fueron solo flores.",
+    "Siempre fueron un recordatorio de que hay personas que llegan a nuestra vida y logran que una estación entera tenga otro significado.",
+    "Cada septiembre pienso en ellas.",
+    "Y, sin darme cuenta, también pienso en ti.",
+    "No porque quiera detener el tiempo.",
+    "Sino porque fuiste parte de un capítulo que me enseñó a amar de una manera que jamás había conocido.",
+    "Si algún día la vida nos vuelve a cruzar, me gustaría que pudieras encontrar a un hombre que aprendió a cuidar mejor los silencios, los abrazos y los pequeños momentos.",
+    "Y si la vida decide escribir otro camino para nosotros, quiero que sepas algo que nadie podrá cambiar.",
+    "Jamás me arrepentiré de haberte conocido.",
+    "Porque gracias a ti descubrí que mi corazón era capaz de escribir poemas donde antes solo había planos de proyectos, motores, robots y sueños imposibles.",
+    "Me enseñaste que también existen los sueños que caminan de la mano.",
+    "Y eso ya nadie me lo quita.",
+    "Si estas páginas permanecen escondidas para siempre, está bien.",
+    "No nacieron para pedirte nada.",
+    "Nacieron para agradecerle a la vida por haberme permitido coincidir contigo en este pedacito del universo.",
+    "Y mientras existan flores amarillas floreciendo en algún lugar del mundo, habrá una parte de mí que sonría al recordar que una vez hubo una chica capaz de llenar de primavera el jardín de mi corazón.",
+    "Con todo el cariño que alguna vez aprendió a florecer.",
+    "Peque gracias por enseñarme que el amor también florece cuando aprende a escuchar.🤍",
+    "Hay una verdad que llevo guardando muy dentro de mí.",
+    "Mi sueño nunca fue regalarte cosas bonitas.",
+    "Mi sueño eras tú.",
+    "Las flores amarillas, la feria del libro, los amaneceres, los cuadros, los pequeños detalles... nunca fueron el destino. Siempre fueron la manera en la que imaginaba caminar la vida contigo.",
+    "Y hay algo que quisiera confesarte.",
+    "Si algún día la vida nos regalara otra oportunidad, me gustaría empezar de nuevo, pero sin volver a cometer el mismo error.",
+    "Esta vez no correría detrás del futuro olvidándome del presente.",
+    "Quisiera volver a aprender tus silencios, reírme contigo por tonterías, hacerte un desayuno cualquier domingo, esperar contigo un atardecer sin mirar el reloj y abrazarte sin pensar que siempre habrá otro día para hacerlo.",
+    "Porque ahora entiendo que el amor más bonito no siempre vive en los grandes planes.",
+    "También vive en los minutos pequeños.",
+    "En preguntarte cómo amaneciste.",
+    "En escucharte sin querer encontrar una solución.",
+    "En sostener tu mano aunque el mundo esté en silencio.",
+    "Y, ¿sabes?",
+    "Todavía me ilusiona imaginar esa versión de nosotros.",
+    "No porque crea que el pasado pueda repetirse.",
+    "Sino porque sueño con una versión más madura de los dos, donde todo lo que aprendimos deje de ser una herida y se convierta en la forma en que nos cuidamos.",
+    "Quizá sea un sueño.",
+    "Quizá solo sea una página escrita en un libro que nadie más leerá.",
+    "Pero me gusta pensar que los sueños bonitos no pierden su belleza por permanecer escritos.",
+    "A veces vuelvo a abrir aquel primer libro.",
+    "El del chico que, con el corazón acelerado, te pidió que fueras su novia.",
+    "Y sonrío.",
+    "No porque todo haya salido perfecto.",
+    "Sino porque ese muchacho escribió promesas que nacían desde el amor más puro que conocía.",
+    "Hoy volvería a escribirlas diferente.",
+    "No prometería un futuro perfecto.",
+    "Prometería algo más sencillo.",
+    "Elegirte en los días fáciles.",
+    "Y también en los difíciles.",
+    "Escucharte antes de intentar salvar el mundo.",
+    "Hacerte sentir acompañada antes que impresionada.",
+    "Y cuidar esa luz que un día me pediste que nunca dejara apagarse.",
+    "Porque si alguna vez volviera a tener la fortuna de caminar contigo, mi mayor sueño ya no sería construir el momento perfecto.",
+    "Mi mayor sueño sería que, muchos años después, pudiéramos mirar hacia atrás y decir:",
+    "\"Qué bonito fue aprender a querernos mejor.\"",
+    "Si el destino algún día volviera a cruzar nuestros caminos, me gustaría que encontraras al mismo chico que un día te amó con locura, pero convertido en un hombre que aprendió que el amor también se demuestra escuchando, quedándose y abrazando el presente. Y si ese día nunca llega, siempre me quedará la paz de haber soñado contigo con el corazón más sincero que tuve.",
+    "Si llegaste hasta aquí... significa que recordaste una fecha que para mí nunca dejó de tener significado.\nY, de alguna manera, eso ya hizo sonreír a este corazón.",
+   "Hay algo curioso del tiempo.\nAntes pensaba que el tiempo servía para construir futuros.\nAhora creo que también sirve para enseñarnos a mirar hacia atrás con más ternura.",
+ 
+  "Durante mucho tiempo quise entender en qué momento empezamos a caminar distinto. Revisé recuerdos, conversaciones, abrazos, silencios... buscando la respuesta como quien intenta encontrar una estrella específica en un cielo lleno de ellas.",
+ 
+  "Y un día entendí algo.\nNo necesitaba encontrar un culpable.\nNecesitaba encontrarme a mí.",
+ 
+  "Hoy sé que hubo un chico que quería regalarte el mundo entero mientras olvidaba sentarse contigo a ver el atardecer.\nY también sé que ese chico nunca dejó de quererte.\nSolo estaba intentando demostrar su amor de una forma que no siempre lograba abrazar el tuyo.",
+ 
+  "Ojalá hubiera aprendido antes que el amor también vive en los cinco minutos antes de una clase, en una risa compartida, en una conversación sin prisas, en preguntar \"¿cómo estás?\" y quedarse para escuchar la respuesta completa.",
+ 
+  "Hay cosas que nunca cambiaron.\nTodavía me parece increíble cómo una canción puede recordarme tu risa.\nCómo las flores amarillas siguen teniendo otro significado desde que llegaste.\nCómo cada septiembre parece guardar un pedacito de nosotros.",
+ 
+  "Y hay algo que nunca te confesé del todo.\nCada esfuerzo de este año tenía una dirección.\nNo buscaba impresionarte.\nBuscaba construir un recuerdo tan bonito que, muchos años después, pudiéramos reírnos diciendo: \"¿Te acuerdas de aquel día?\"",
+ 
+  "La ironía es que hoy mi recuerdo favorito no es un gran plan.\nEs algo mucho más sencillo.\nTú siendo tú.",
+ 
+  "Con esa forma tan tuya de hablar, de emocionarte con un libro, de perderte viendo un paisaje o de iluminar un lugar sin darte cuenta.",
+ 
+  "Y ahí comprendí que el hogar nunca fue un sitio.\nEras tú cuando sonreías tranquila.",
+ 
+  "Si pudiera pedirle algo al universo, no le pediría que borrara nuestros errores.\nLe pediría que nunca borre todo lo bonito que vivimos.\nPorque eso también somos nosotros.",
+ 
+  "Y ahora quiero dejar aquí una verdad que nunca nació de la obligación.\nNació del sueño más bonito que tuve.",
+ 
+  "Si algún día, cuando la vida haya terminado de enseñarnos todo lo que aún nos falta aprender, nuestros caminos vuelven a encontrarse y tu corazón vuelve a mirar hacia el mío...",
+ 
+  "Me encantaría volver a tomarte de la mano.\nNo para empezar donde terminamos.\nSino para empezar desde quienes somos ahora.",
+ 
+  "Sin correr detrás del futuro.\nSin olvidar el presente.\nCon más escucha.\nMás paciencia.\nMás abrazos largos.\nMás desayunos improvisados.\nMás amaneceres.\nY más flores amarillas.",
+ 
+  "No porque crea que el destino nos deba algo.\nSino porque sigo creyendo que hay personas que merecen un amor que también sabe crecer.",
+ 
+  "Y si la vida decide escribir otra historia para nosotros, quiero que esta página siga teniendo exactamente el mismo significado.",
+ 
+  "Gracias.",
+ 
+  "Porque, aunque nunca llegues a leer estas palabras, existió una chica que logró que un muchacho aprendiera que el amor más profundo no siempre se grita.\nA veces se escribe.\nY se guarda.\nComo un secreto bonito entre las páginas del corazón.",
+ 
+  "Con todo el cariño del chico que nunca dejó de admirar la luz que vio en tus ojos. 🌼🤍"
+  ]
+};
+
+/* ======================================================================
+   2) De aquí para abajo es la magia. Puedes mirar, pero no hace falta tocar.
+   ====================================================================== */
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const dormir = (ms) => new Promise(r => setTimeout(r, ms));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pocoMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Texto: partir en palabras para revelarlas una a una ---------- */
+function partirEnPalabras(el){
+  const texto = el.dataset.texto || el.textContent;
+  el.textContent = '';
+  texto.split(' ').forEach((palabra, i) => {
+    const s = document.createElement('span');
+    s.textContent = palabra;
+    s.style.setProperty('--i', i);
+    el.appendChild(s);
+  });
+}
+$$('.rev').forEach(partirEnPalabras);
+
+/* ---------- Escribir el contenido personalizado ---------- */
+(function montarTextos(){
+  const nombre = CONFIG.nombre.trim();
+  $('#linea-para').innerHTML = nombre ? `para <b>${nombre}</b>` : 'para ti';
+
+  const carta = $('#carta');
+  CONFIG.mensaje.forEach((linea, i) => {
+    const p = document.createElement('p');
+    p.textContent = linea;
+    p.style.setProperty('--i', i);
+    carta.appendChild(p);
+  });
+
+  $('#etiqueta-firma').textContent = CONFIG.etiquetaFirma;
+  $('#firma').textContent = CONFIG.firma;
+
+  const contOculto = $('#mensajeOculto');
+  CONFIG.mensajeOculto.forEach((t, i) => {
+    const p = document.createElement('p');
+    p.textContent = t;
+    if(i === 0) p.classList.add('oculto-titulo');
+    contOculto.appendChild(p);
+  });
+})();
+
+/* ---------- Luces de fondo ---------- */
+(function sembrarLuces(){
+  const cont = $('#luces');
+  for(let i = 0; i < 16; i++){
+    const l = document.createElement('div');
+    l.className = 'luz';
+    const t = rnd(3, 9);
+    l.style.cssText = `left:${rnd(2,96)}%; top:${rnd(4,78)}%; width:${t}px; height:${t}px;
+                       --d:${rnd(2.5,6).toFixed(2)}s; --r:${(-rnd(0,6)).toFixed(2)}s;`;
+    cont.appendChild(l);
+  }
+})();
+
+/* ---------- Lluvia de pétalos ---------- */
+function sembrarLluvia(cantidad){
+  const cont = $('#lluvia');
+  for(let i = 0; i < cantidad; i++){
+    const wrap = document.createElement('div');
+    wrap.className = 'caida';
+    wrap.style.cssText = `--x:${rnd(-4,100).toFixed(1)}%; --dur:${rnd(9,19).toFixed(1)}s; --delay:${(-rnd(0,19)).toFixed(1)}s;`;
+    const p = document.createElement('div');
+    p.className = 'petalo';
+    p.style.cssText = `--s:${rnd(.55,1.25).toFixed(2)}; --o:${rnd(.45,.9).toFixed(2)};
+                       --rot:${rnd(200,520).toFixed(0)}deg; --sw:${rnd(2.4,4.6).toFixed(2)}s;`;
+    wrap.appendChild(p);
+    cont.appendChild(wrap);
+  }
+}
+
+/* ---------- Construir una flor mágica luminosa en SVG ----------
+   Pétalos alargados que se curvan en la punta, corazón incandescente
+   y zarcillos de luz que suben en espiral. Diseño propio. */
+function crearGirasol({ petalos = 6, retraso = 0 }){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '-130 -230 260 460');
+
+  const uid = 'f' + Math.random().toString(36).slice(2, 8);
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="${uid}p" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0"   stop-color="#c96a00"/>
+        <stop offset=".38" stop-color="#ffb52e"/>
+        <stop offset=".72" stop-color="#ffe9a3"/>
+        <stop offset="1"   stop-color="#fffaf0"/>
+      </linearGradient>
+      <linearGradient id="${uid}q" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0"   stop-color="#7a2a10"/>
+        <stop offset=".5"  stop-color="#e0631a"/>
+        <stop offset="1"   stop-color="#ffcf6b"/>
+      </linearGradient>
+      <radialGradient id="${uid}c">
+        <stop offset="0"   stop-color="#fff6d8"/>
+        <stop offset=".28" stop-color="#ffc93c"/>
+        <stop offset=".62" stop-color="#c1391f"/>
+        <stop offset="1"   stop-color="#4a0f2c"/>
+      </radialGradient>
+      <radialGradient id="${uid}g">
+        <stop offset="0"   stop-color="#fff3c4" stop-opacity=".9"/>
+        <stop offset="1"   stop-color="#ffb400" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="${uid}h" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#3f8f63"/>
+        <stop offset="1" stop-color="#1f5238"/>
+      </linearGradient>
+      <filter id="${uid}glow" x="-120%" y="-120%" width="340%" height="340%">
+        <feGaussianBlur stdDeviation="6" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>`;
+
+  // --- tallo ---
+  const tallo = document.createElementNS(NS, 'path');
+  tallo.setAttribute('d', 'M0,18 C 8,80 -8,150 3,232');
+  tallo.setAttribute('stroke', 'url(#' + uid + 'h)');
+  tallo.setAttribute('stroke-width', '9');
+  tallo.setAttribute('stroke-linecap', 'round');
+  tallo.setAttribute('fill', 'none');
+  tallo.setAttribute('class', 'tallo');
+  svg.appendChild(tallo);
+
+  // --- hojas ---
+  const hojas = [
+    { d: 'M2,110 C -34,96 -62,112 -74,138 C -44,152 -10,142 2,110 Z', dh: '1.0s' },
+    { d: 'M0,162 C 32,150 62,164 72,188 C 44,200 12,190 0,162 Z',     dh: '1.18s' }
+  ];
+  hojas.forEach(h => {
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', h.d);
+    p.setAttribute('fill', 'url(#' + uid + 'h)');
+    p.setAttribute('class', 'hoja');
+    p.style.setProperty('--dh', h.dh);
+    svg.appendChild(p);
+  });
+
+  // --- la cabeza (aura + pétalos + corazón + chispas + zarcillos) ---
+  const cabeza = document.createElementNS(NS, 'g');
+  cabeza.setAttribute('class', 'cabeza');
+  cabeza.setAttribute('filter', 'url(#' + uid + 'glow)');
+
+  // halo de luz detrás de todo
+  const aura = document.createElementNS(NS, 'circle');
+  aura.setAttribute('r', '78');
+  aura.setAttribute('fill', 'url(#' + uid + 'g)');
+  aura.setAttribute('class', 'aura');
+  cabeza.appendChild(aura);
+
+  const anilloInterno = document.createElementNS(NS, 'g');
+  const anilloExterno = document.createElementNS(NS, 'g');
+
+  // pétalos internos, más cortos, encendidos en naranja profundo (la garganta de la flor)
+  for(let i = 0; i < petalos; i++){
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('transform', `rotate(${(360 / petalos) * i + (180 / petalos)})`);
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', 'M0,-14 C -16,-38 -15,-66 0,-92 C 15,-66 16,-38 0,-14 Z');
+    p.setAttribute('fill', 'url(#' + uid + 'q)');
+    p.setAttribute('class', 'pet');
+    p.style.setProperty('--i', i);
+    g.appendChild(p);
+    anilloInterno.appendChild(g);
+  }
+
+  // pétalos largos y curvos, con la punta enroscándose hacia atrás
+  for(let i = 0; i < petalos; i++){
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('transform', `rotate(${(360 / petalos) * i})`);
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d',
+      'M0,-16 C -30,-56 -34,-104 -18,-148 C -10,-168 10,-168 18,-148 ' +
+      'C 34,-104 30,-56 0,-16 Z ' +
+      'M-14,-142 C -20,-156 -16,-168 -6,-172 C -12,-162 -14,-152 -14,-142 Z ' +
+      'M14,-142 C 20,-156 16,-168 6,-172 C 12,-162 14,-152 14,-142 Z'
+    );
+    p.setAttribute('fill', 'url(#' + uid + 'p)');
+    p.setAttribute('class', 'pet');
+    p.style.setProperty('--i', (i * 5) % petalos);
+    // unas pecas suaves, como si la luz salpicara el pétalo
+    const pecas = document.createElementNS(NS, 'g');
+    pecas.setAttribute('opacity', '.5');
+    for(let k = 0; k < 4; k++){
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', (rnd2(-10, 10)).toFixed(1));
+      c.setAttribute('cy', (-40 - k * 22).toFixed(1));
+      c.setAttribute('r', '2.1');
+      c.setAttribute('fill', '#a63b12');
+      pecas.appendChild(c);
+    }
+    g.appendChild(p);
+    g.appendChild(pecas);
+    anilloExterno.appendChild(g);
+  }
+
+  cabeza.appendChild(anilloExterno);
+  cabeza.appendChild(anilloInterno);
+
+  // corazón incandescente
+  const centro = document.createElementNS(NS, 'circle');
+  centro.setAttribute('r', '24');
+  centro.setAttribute('fill', 'url(#' + uid + 'c)');
+  centro.setAttribute('class', 'centro');
+  cabeza.appendChild(centro);
+
+  // chispas de luz titilando alrededor del corazón
+  const chispas = document.createElementNS(NS, 'g');
+  chispas.setAttribute('class', 'semillas');
+  for(let i = 0; i < 14; i++){
+    const a = (i / 14) * Math.PI * 2, r = rnd2(8, 30);
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', (r * Math.cos(a)).toFixed(1));
+    c.setAttribute('cy', (r * Math.sin(a)).toFixed(1));
+    c.setAttribute('r', rnd2(1, 2.4).toFixed(1));
+    c.setAttribute('fill', '#fff6d8');
+    c.setAttribute('class', 'chispa');
+    c.style.setProperty('--ct', rnd2(1.4, 2.6).toFixed(2) + 's');
+    c.style.setProperty('--cr', (-rnd2(0, 2)).toFixed(2) + 's');
+    chispas.appendChild(c);
+  }
+  cabeza.appendChild(chispas);
+
+  // zarcillos de luz, subiendo en espiral sobre la flor
+  const zarcillos = document.createElementNS(NS, 'g');
+  const trazos = [
+    'M-4,-30 C -30,-58 -26,-96 6,-112 C 30,-124 40,-104 24,-90 C 10,-78 4,-92 12,-100',
+    'M6,-24 C 34,-46 44,-82 24,-108 C 10,-126 -14,-116 -8,-98 C -2,-84 10,-92 6,-104'
+  ];
+  trazos.forEach((d, i) => {
+    const p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', d);
+    p.setAttribute('stroke', '#ffe9a3');
+    p.setAttribute('stroke-width', '2.4');
+    p.setAttribute('stroke-linecap', 'round');
+    p.setAttribute('fill', 'none');
+    p.setAttribute('class', 'zarcillo');
+    zarcillos.appendChild(p);
+  });
+  cabeza.appendChild(zarcillos);
+
+  svg.appendChild(cabeza);
+
+  // longitud del tallo para el trazo animado
+  const cont = document.createElement('div');
+  cont.className = 'flor';
+  cont.appendChild(svg);
+  cont.style.setProperty('--dflor', retraso + 's');
+
+  // dar longitud a cada zarcillo para que se dibuje solo
+  requestAnimationFrame(() => {
+    zarcillos.querySelectorAll('.zarcillo').forEach(z => {
+      z.style.setProperty('--zl', z.getTotalLength());
+    });
+  });
+
+  return { nodo: cont, tallo, cabeza };
+}
+function rnd2(a, b){ return a + Math.random() * (b - a); }
+
+/* Guardamos referencia a todas las cabezas para poder inclinarlas más tarde */
+const CABEZAS_GIRASOL = [];
+
+/* ---------- Sembrar el jardín ---------- */
+function sembrarJardin(){
+  const jardin = $('#jardin');
+  const angosto = window.innerWidth < 620;
+
+  // izquierda→derecha: posición, ancho, retraso, brisa
+  const plan = angosto
+    ? [
+        { l: '-16%', w: 'clamp(150px, 44vw, 230px)', d: 0.5,  b: 6.5 },
+        { l: '56%',  w: 'clamp(170px, 52vw, 260px)', d: 0.15, b: 5.4 },
+        { l: '18%',  w: 'clamp(210px, 66vw, 320px)', d: 0.0,  b: 7.2 }
+      ]
+    : [
+        { l: '-6%',  w: 'clamp(150px, 20vw, 250px)', d: 0.55, b: 6.8 },
+        { l: '76%',  w: 'clamp(160px, 22vw, 270px)', d: 0.35, b: 5.6 },
+        { l: '16%',  w: 'clamp(170px, 21vw, 260px)', d: 0.7,  b: 7.4 },
+        { l: '40%',  w: 'clamp(230px, 30vw, 380px)', d: 0.0,  b: 8.0 }
+      ];
+
+  plan.forEach((p, i) => {
+    const { nodo, tallo, cabeza } = crearGirasol({ retraso: p.d });
+    nodo.style.left = p.l;
+    nodo.style.setProperty('--w', p.w);
+    nodo.style.setProperty('--brisa', p.b + 's');
+    nodo.style.setProperty('--bd', (-i * 0.8) + 's');
+    nodo.style.zIndex = i;
+    jardin.appendChild(nodo);
+    const largo = tallo.getTotalLength();
+    tallo.style.setProperty('--len', largo);
+    CABEZAS_GIRASOL.push(cabeza);
+  });
+}
+
+/* ---------- Ramillete al tocar la pantalla (y para la explosión del candado) ---------- */
+function ramillete(x, y, cantidad = 9){
+  for(let i = 0; i < cantidad; i++){
+    const p = document.createElement('div');
+    p.className = 'petalo';
+    const ang = rnd(0, Math.PI * 2), dist = rnd(60, 190);
+    p.style.cssText = `position:fixed; left:${x}px; top:${y}px; z-index:25; pointer-events:none;
+                       --s:${rnd(.6,1.2).toFixed(2)}; --o:1; animation:none;
+                       transition: transform 1.3s cubic-bezier(.1,.7,.3,1), opacity 1.3s ease;`;
+    document.body.appendChild(p);
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist + 70}px) rotate(${rnd(-260,260)}deg)`;
+      p.style.opacity = '0';
+    });
+    setTimeout(() => p.remove(), 1400);
+  }
+}
+
+/* ======================================================================
+   MÚSICA: una cajita de música hecha a mano (sin archivos externos)
+   ====================================================================== */
+const NOTA = { G4:392.00, A4:440.00, C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:783.99, A5:880.00, C6:1046.50 };
+const MELODIA = [
+  [0,'C5'],[0.5,'E5'],[1,'G5'],[1.5,'A5'],
+  [2,'G5'],[2.5,'E5'],[3,'D5'],[3.5,'E5'],
+  [4,'F5'],[4.5,'A5'],[5,'C6'],[5.5,'A5'],
+  [6,'G5'],[6.5,'E5'],[7,'C5'],[7.5,'D5'],
+  [8,'E5'],[8.5,'G5'],[9,'C6'],[9.5,'G5'],
+  [10,'A5'],[10.5,'E5'],[11,'D5'],[11.5,'C5'],
+  [12,'F5'],[12.5,'E5'],[13,'D5'],[13.5,'G4'],
+  [14,'C5'],[15,'E5']
+];
+const BAJO = [[0,'C5'],[2,'A4'],[4,'F5'],[6,'G4'],[8,'C5'],[10,'A4'],[12,'F5'],[14,'G4']];
+const PULSO = 0.5, VUELTA = 16 * PULSO, VOLUMEN = 0.17;
+
+let actx, maestro, silenciado = false, relojMusica = null;
+
+function nota(f, t, dur, vol, tipo = 'triangle'){
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = tipo; o.frequency.value = f;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(maestro);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+
+function vuelta(t0){
+  MELODIA.forEach(([b, n]) => nota(NOTA[n], t0 + b * PULSO, 2.3, 0.16));
+  BAJO.forEach(([b, n]) => nota(NOTA[n] / 4, t0 + b * PULSO, 2.8, 0.13, 'sine'));
+}
+
+function arrancarMusica(){
+  if(!CONFIG.musica || actx) return;
+  try{
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    maestro = actx.createGain();
+    maestro.gain.value = 0.0001;
+    maestro.connect(actx.destination);
+
+    // eco suave, para que suene a habitación grande
+    const eco = actx.createDelay(1.0); eco.delayTime.value = 0.36;
+    const realim = actx.createGain(); realim.gain.value = 0.28;
+    const mojado = actx.createGain(); mojado.gain.value = 0.3;
+    maestro.connect(eco); eco.connect(realim); realim.connect(eco);
+    eco.connect(mojado); mojado.connect(actx.destination);
+
+    maestro.gain.linearRampToValueAtTime(VOLUMEN, actx.currentTime + 3.5);
+
+    let t = actx.currentTime + 0.2;
+    vuelta(t); vuelta(t + VUELTA);
+    relojMusica = setInterval(() => { t += VUELTA; vuelta(t + VUELTA); }, VUELTA * 1000);
+    $('#sonido').textContent = '♪';
+  }catch(e){ /* si el navegador no deja, seguimos sin música */ }
+}
+
+$('#sonido').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if(!actx) return;
+  silenciado = !silenciado;
+  maestro.gain.cancelScheduledValues(actx.currentTime);
+  maestro.gain.linearRampToValueAtTime(silenciado ? 0.0001 : VOLUMEN, actx.currentTime + 0.35);
+  $('#sonido').textContent = silenciado ? '♪̶' : '♪';
+  $('#sonido').setAttribute('aria-label', silenciado ? 'Activar la música' : 'Silenciar la música');
+});
+
+/* ---------- Un contexto de audio propio para la caja fuerte, por si la música está apagada ---------- */
+let actxCaja;
+function obtenerAudioCaja(){
+  if(actx) return actx;
+  if(!actxCaja){
+    try{ actxCaja = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return null; }
+  }
+  return actxCaja;
+}
+
+/* clic de mecanismo: un tic metálico y seco al escribir cada dígito */
+function clicMecanismo(){
+  const ctx = obtenerAudioCaja();
+  if(!ctx) return;
+  const t = ctx.currentTime;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'square';
+  o.frequency.setValueAtTime(1500, t);
+  o.frequency.exponentialRampToValueAtTime(520, t + 0.05);
+  g.gain.setValueAtTime(0.001, t);
+  g.gain.linearRampToValueAtTime(0.14, t + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t); o.stop(t + 0.07);
+}
+
+/* sonido grave de "no" cuando la fecha no coincide */
+function clicRechazo(){
+  const ctx = obtenerAudioCaja();
+  if(!ctx) return;
+  const t = ctx.currentTime;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(180, t);
+  o.frequency.exponentialRampToValueAtTime(90, t + 0.28);
+  g.gain.setValueAtTime(0.001, t);
+  g.gain.linearRampToValueAtTime(0.12, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t); o.stop(t + 0.32);
+}
+
+/* pequeño arpegio dorado cuando la fecha acierta */
+function acordeExito(){
+  const ctx = obtenerAudioCaja();
+  if(!ctx) return;
+  const t0 = ctx.currentTime;
+  [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = f;
+    const t = t0 + i * 0.09;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.15, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t + 0.95);
+  });
+}
+
+
+/* ======================================================================
+   MEMORIA LOCAL + CONTADOR DE APERTURAS
+   Nota: localStorage cuenta visitas en ESTE navegador/dispositivo.
+   Para un contador global se necesita un backend.
+   ====================================================================== */
+const MEMORIA_KEY = 'flores-amarillas-memoria-v2';
+function leerMemoria(){
+  try{return JSON.parse(localStorage.getItem(MEMORIA_KEY) || '{}');}
+  catch(e){return {}}
+}
+function guardarMemoria(m){
+  try{localStorage.setItem(MEMORIA_KEY, JSON.stringify(m));}catch(e){}
+}
+function registrarApertura(){
+  const m=leerMemoria();
+  const ahora=new Date();
+  m.aperturas=(m.aperturas||0)+1;
+  m.ultimaApertura=ahora.toISOString();
+  if(!m.primeraApertura) m.primeraApertura=ahora.toISOString();
+  guardarMemoria(m);
+  return m;
+}
+function yaFueAbierto(){ return !!leerMemoria().desbloqueado; }
+function registrarDesbloqueo(){
+  const m=leerMemoria();
+  m.desbloqueado=true;
+  m.fechaDesbloqueo=new Date().toISOString();
+  guardarMemoria(m);
+}
+function actualizarMemoriaVisual(){
+  const m=leerMemoria();
+  const el=$('#memoriaVisita');
+  if(!el) return;
+  if(m.desbloqueado){
+    el.textContent='Este jardín recuerda que ya encontraste la puerta.';
+  }else{
+    el.textContent='';
+  }
+}
+actualizarMemoriaVisual();
+
+/* ======================================================================
+   PARTÍCULAS + ÚLTIMA PUERTA
+   ====================================================================== */
+function crearParticulasDorado(cantidad=90){
+  const cont=$('#particulasDorado');
+  if(!cont) return;
+  cont.innerHTML='';
+  for(let i=0;i<cantidad;i++){
+    const p=document.createElement('span');
+    p.className='particula-dorada';
+    const ang=Math.random()*Math.PI*2;
+    const dist=rnd(80,Math.max(innerWidth,innerHeight)*.62);
+    p.style.left='50%'; p.style.top='50%';
+    p.style.setProperty('--tx',`${Math.cos(ang)*dist}px`);
+    p.style.setProperty('--ty',`${Math.sin(ang)*dist}px`);
+    p.style.animationDelay=`${rnd(0,.9).toFixed(2)}s`;
+    p.style.width=p.style.height=`${rnd(2,6).toFixed(1)}px`;
+    cont.appendChild(p);
+  }
+}
+async function mostrarUltimaPuerta(){
+  const p=$('#ultimaPuerta');
+
+  p.classList.add('activo');
+  p.setAttribute('aria-hidden','false');
+  p.style.opacity = '1';
+  p.style.transition = 'opacity 1.2s ease';
+
+  crearParticulasDorado(pocoMovimiento ? 0 : 100);
+
+  // Tiempo para leer las tres frases de la última puerta
+  await dormir(pocoMovimiento ? 700 : 3600);
+
+  // Desvanecer la última puerta antes de mostrar la carta
+  p.style.opacity = '0';
+  await dormir(pocoMovimiento ? 300 : 1200);
+
+  p.classList.remove('activo');
+  p.setAttribute('aria-hidden','true');
+  p.style.opacity = '';
+  p.style.transition = '';
+}
+function ocultarUltimaPuerta(){
+  const p=$('#ultimaPuerta');
+  p.classList.remove('activo');
+  p.setAttribute('aria-hidden','true');
+}
+
+/* ======================================================================
+   REVELADO DE LA CARTA SECRETA COMO TINTA SOBRE PAPEL
+   ====================================================================== */
+function prepararTinta(){
+  const cont=$('#mensajeOculto');
+  cont.classList.remove('tinta');
+  const parrafos=[...cont.querySelectorAll('p')];
+  parrafos.forEach((p,i)=>{
+    p.style.setProperty('--i',i);
+    if(i===0) p.style.animationDelay='0ms';
+  });
+  void cont.offsetWidth;
+  cont.classList.add('tinta');
+}
+
+/* ======================================================================
+   NOTIFICACIÓN SEGURA (opcional)
+   GitHub Pages no debe contener secretos ni webhooks privados.
+   ====================================================================== */
+async function notificarDesbloqueo(){
+  const endpoint=CONFIG.notificacion?.endpoint?.trim();
+  if(!CONFIG.notificacion?.enviar || !endpoint) return;
+  const payload={
+    evento:'safe-unlock',
+    fecha:new Date().toISOString(),
+    idioma:navigator.language || '',
+    zonaHoraria:Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+    plataforma:navigator.platform || ''
+  };
+  try{
+    const r=await fetch(endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+      keepalive:true
+    });
+    if(r.ok) $('#notificacionEstado').textContent='El jardín guardó el momento.';
+  }catch(e){
+    // La experiencia no depende de la notificación.
+  }
+}
+
+/* ======================================================================
+   LA CAJA FUERTE: escribir la fecha, sentir el mecanismo, ver la magia
+   Se verifica sola en cuanto los 3 campos están completos — sin clic.
+   ====================================================================== */
+(function inicializarCajaFuerte(){
+  const inputs = [$('#diaInput'), $('#mesInput'), $('#anioInput')];
+  const grupo = $('#fechaInputs');
+  let verificando = false; // evita que se dispare varias veces seguidas
+
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, inp.maxLength);
+      clicMecanismo();
+      inp.classList.remove('brilla');
+      void inp.offsetWidth;
+      inp.classList.add('brilla');
+
+      if(inp.value.length >= inp.maxLength && idx < inputs.length - 1){
+        inputs[idx + 1].focus();
+      }
+
+      verificarSiCompleta();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && inp.value === '' && idx > 0){
+        inputs[idx - 1].focus();
+      }
+    });
+  });
+
+  /* revisa sola, sin clic, en cuanto los 3 campos están completos */
+  function verificarSiCompleta(){
+    const d = $('#diaInput').value;
+    const m = $('#mesInput').value;
+    const a = $('#anioInput').value;
+    const completa = d.length === 2 && m.length === 2 && a.length === 4;
+    if(completa && !verificando){
+      verificando = true;
+      setTimeout(comprobarFecha, 220); // pequeña pausa para que se vea el último clic
+    }
+  }
+
+  function comprobarFecha(){
+    const d = $('#diaInput').value.padStart(2, '0');
+    const m = $('#mesInput').value.padStart(2, '0');
+    const a = $('#anioInput').value;
+
+    const ok = d === CONFIG.fechaSecreta.dia &&
+               m === CONFIG.fechaSecreta.mes &&
+               a === CONFIG.fechaSecreta.anio;
+
+    ok ? secuenciaExito() : secuenciaError();
+    verificando = false;
+  }
+
+  /* inclina las cabezas de los girasoles, como una reverencia, y luego las devuelve a su vaivén normal */
+  function inclinarGirasoles(){
+    CABEZAS_GIRASOL.forEach((cabeza, i) => {
+      const espera = i * 130;
+      setTimeout(() => {
+        cabeza.classList.add('reverencia');
+        cabeza.style.transition = 'transform 1s cubic-bezier(.32,.08,.24,1)';
+        cabeza.style.transform = 'rotate(20deg)';
+        setTimeout(() => {
+          cabeza.style.transform = 'rotate(0deg)';
+          setTimeout(() => {
+            cabeza.classList.remove('reverencia');
+            cabeza.style.transition = '';
+            cabeza.style.transform = '';
+          }, 1050);
+        }, 900);
+      }, espera);
+    });
+  }
+
+  async function secuenciaExito(){
+    $('#errorFecha').textContent = '';
+    registrarDesbloqueo();
+    acordeExito();
+    inclinarGirasoles();
+    notificarDesbloqueo();
+
+    grupo.style.transition = 'opacity .5s ease, transform .5s ease';
+    grupo.style.opacity = '0';
+    grupo.style.transform = 'scale(.92)';
+
+    const candado = $('#candadoDorado');
+    setTimeout(() => {
+      grupo.style.display = 'none';
+      candado.classList.add('aparece');
+    }, 480);
+
+    setTimeout(() => candado.classList.add('abierto'), 1250);
+
+    setTimeout(() => {
+      const r = candado.getBoundingClientRect();
+      ramillete(r.left + r.width / 2, r.top + r.height / 2, 18);
+    }, 2050);
+
+    await dormir(2350);
+
+    // Mostrar la última puerta y esperar a que termine su desvanecimiento
+    await mostrarUltimaPuerta();
+
+    // Ahora sí revelar la carta secreta
+    $('#pantallaSecreta').classList.add('activo');
+    $('#mensajeOculto').scrollTop=0;
+    prepararTinta();
+    const m=leerMemoria();
+    $('#contadorSecreto').textContent =
+      `Apertura local nº ${m.aperturas||1} · ${new Date().toLocaleDateString()}`;
+  }
+
+  function secuenciaError(){
+    clicRechazo();
+    grupo.classList.remove('tiembla');
+    void grupo.offsetWidth;
+    grupo.classList.add('tiembla');
+    $('#errorFecha').textContent = 'Esa fecha aún no abre este recuerdo.';
+
+    // limpia los campos para que puedan volver a intentarlo desde cero
+    setTimeout(() => {
+      inputs.forEach(inp => inp.value = '');
+      inputs[0].focus();
+    }, 500);
+  }
+
+  $('#volverCarta').addEventListener('click', () => {
+    $('#pantallaSecreta').classList.remove('activo');
+    ocultarUltimaPuerta();
+    actualizarMemoriaVisual();
+  });
+})();
+
+/* ======================================================================
+   LA SECUENCIA
+   ====================================================================== */
+const mostrar = (id) => $(id).classList.add('activo');
+const ocultar = (id) => $(id).classList.remove('activo');
+
+async function funcion(){
+  $$('.acto').forEach(a => a.classList.remove('activo'));
+  document.body.classList.add('abierto');
+
+  await dormir(600);
+  mostrar('#acto1');           // "Hoy el mundo entero..."
+  await dormir(4200);
+  ocultar('#acto1');
+
+  await dormir(900);
+  mostrar('#acto2');           // "Y hay un ramo..."
+  $('#jardin').querySelectorAll('.flor').forEach(f => f.classList.add('creciendo')); // 🌻 crecen
+  await dormir(3900);
+  ocultar('#acto2');
+
+  await dormir(1000);
+  mostrar('#acto3');           // TÍTULO
+  await dormir(4600);
+  ocultar('#acto3');
+
+  await dormir(900);
+  mostrar('#acto4');           // la carta
+  await dormir(1200 + CONFIG.mensaje.length * 1100 + 3600);
+  ocultar('#acto4');
+
+  await dormir(900);
+  mostrar('#acto5');           // firma + botón + caja fuerte
+}
+
+
+/* En visitas posteriores, el sobre conserva una pequeña señal de continuidad. */
+(function(){
+  const m=leerMemoria();
+  if(m.desbloqueado){
+    const pista=$('#sobre .pista');
+    if(pista) pista.textContent='toca para volver al jardín';
+  }
+})();
+
+/* ---------- Abrir el sobre ---------- */
+$('#sobre').addEventListener('click', () => {
+  registrarApertura();
+  $('#sobre').classList.add('fuera');
+  arrancarMusica();
+  sembrarLluvia(pocoMovimiento ? 0 : 22);
+  funcion();
+  setTimeout(() => $('#sobre').remove(), 1600);
+}, { once: true });
+
+/* ---------- Volver a verlo ---------- */
+$('#deNuevo').addEventListener('click', (e) => {
+  e.stopPropagation();
+  $$('.flor').forEach(f => {
+    f.classList.remove('creciendo');
+    void f.offsetWidth;        // reinicia las animaciones
+  });
+
+  // reinicia también la caja fuerte por si ya se había abierto
+  const grupo = $('#fechaInputs');
+  grupo.style.display = '';
+  grupo.style.opacity = '';
+  grupo.style.transform = '';
+  $('#candadoDorado').classList.remove('aparece', 'abierto');
+  $('#diaInput').value = '';
+  $('#mesInput').value = '';
+  $('#anioInput').value = '';
+  $('#errorFecha').textContent = '';
+  $('#pantallaSecreta').classList.remove('activo');
+  ocultarUltimaPuerta();
+  actualizarMemoriaVisual();
+
+  funcion();
+});
+
+/* ---------- Pétalos al tocar ---------- */
+document.addEventListener('pointerdown', (e) => {
+  if(!document.body.classList.contains('abierto')) return;
+  if(e.target.closest('button, input, .caja-fuerte, #pantallaSecreta')) return;
+  if(pocoMovimiento) return;
+  ramillete(e.clientX, e.clientY);
+});
+
+/* ---------- Arranque ---------- */
+sembrarJardin();
+</script>
+</body>
+</html>
