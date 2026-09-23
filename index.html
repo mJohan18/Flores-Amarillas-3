@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="es">
 <head>
@@ -728,14 +727,22 @@ const CONFIG = {
 
   musica: true,   // pon false si prefieres que no suene nada
 
-  // Endpoint opcional para una notificación segura.
-  // NO pongas aquí un webhook de Discord. En GitHub Pages debe ser un endpoint
-  // intermedio/serverless que reciba el evento y envíe la notificación.
-  notificacion: {
-    endpoint: "https://aviso-sorpresa.marmolejohan2-4.workers.dev/",
-    enviar: true
-  },
+  // Endpoints opcionales para notificaciones seguras.
+  // NO pongas aquí un webhook de Discord directamente. En GitHub Pages debe ser
+  // un endpoint intermedio/serverless (un Cloudflare Worker) que reciba el
+  // evento y sea el que reenvíe el aviso a Discord.
 
+  // 1) Se dispara en cuanto alguien toca el sobre y entra a la página.
+notificacionEntrada:{
+    endpoint:"https://aviso-sorpresa.marmolejohan2-4.workers.dev/visit",
+    enviar:true
+},
+
+  // 2) Se dispara cuando aciertan la fecha secreta y se abre la caja fuerte.
+notificacionDesbloqueo:{
+    endpoint:"https://aviso-sorpresa.marmolejohan2-4.workers.dev/unlock",
+    enviar:true
+},
   // Fecha secreta (cámbiala por la tuya) — cada valor SIEMPRE en texto, con ceros si hace falta
   fechaSecreta: {
     dia:  "10",
@@ -1425,27 +1432,39 @@ function prepararTinta(){
    NOTIFICACIÓN SEGURA (opcional)
    GitHub Pages no debe contener secretos ni webhooks privados.
    ====================================================================== */
-async function notificarDesbloqueo(){
-  const endpoint=CONFIG.notificacion?.endpoint?.trim();
-  if(!CONFIG.notificacion?.enviar || !endpoint) return;
-  const payload={
-    evento:'safe-unlock',
-    fecha:new Date().toISOString(),
-    idioma:navigator.language || '',
-    zonaHoraria:Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-    plataforma:navigator.platform || ''
+async function enviarNotificacion(config, evento){
+  const endpoint = config?.endpoint?.trim();
+  if(!config?.enviar || !endpoint) return false;
+  const payload = {
+    evento,
+    fecha: new Date().toISOString(),
+    idioma: navigator.language || '',
+    zonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+    plataforma: navigator.platform || ''
   };
   try{
-    const r=await fetch(endpoint,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload),
-      keepalive:true
+    const r = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+      keepalive: true
     });
-    if(r.ok) $('#notificacionEstado').textContent='El jardín guardó el momento.';
+    return r.ok;
   }catch(e){
     // La experiencia no depende de la notificación.
+    return false;
   }
+}
+
+/* Se llama al tocar el sobre: avisa por el segundo Worker/canal de Discord
+   la hora, fecha y datos básicos del navegador de quien entró. */
+async function notificarEntrada(){
+  await enviarNotificacion(CONFIG.notificacionEntrada, 'page-open');
+}
+
+async function notificarDesbloqueo(){
+  const ok = await enviarNotificacion(CONFIG.notificacionDesbloqueo, 'safe-unlock');
+  if(ok) $('#notificacionEstado').textContent='El jardín guardó el momento.';
 }
 
 /* ======================================================================
@@ -1630,6 +1649,7 @@ async function funcion(){
 /* ---------- Abrir el sobre ---------- */
 $('#sobre').addEventListener('click', () => {
   registrarApertura();
+  notificarEntrada();
   $('#sobre').classList.add('fuera');
   arrancarMusica();
   sembrarLluvia(pocoMovimiento ? 0 : 22);
